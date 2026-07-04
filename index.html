@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#163d3a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Вендэкс Scout">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icons/icon.svg">
+    <link rel="stylesheet" href="styles.css">
+    <title>Вендэкс Scout</title>
+  </head>
+  <body>
+    <div id="app" class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Вендэкс Scout</p>
+          <h1 id="screenTitle">Сегодня</h1>
+        </div>
+        <button class="icon-button" id="installButton" title="Установить" hidden>↓</button>
+      </header>
+
+      <main class="main-view">
+        <section class="toolbar" aria-label="Поиск и разделы">
+          <label class="search-field">
+            <span aria-hidden="true">⌕</span>
+            <input id="searchInput" type="search" placeholder="Клиент, адрес, статус, договоренность">
+          </label>
+          <div class="segmented" role="tablist" aria-label="Разделы">
+            <button class="segment active" data-view="today">Сегодня</button>
+            <button class="segment" data-view="pipeline">Воронка</button>
+            <button class="segment" data-view="list">База</button>
+            <button class="segment" data-view="map">Карта</button>
+          </div>
+        </section>
+
+        <section class="stats" aria-label="Сводка">
+          <div>
+            <span id="statDue">0</span>
+            <p>сделать</p>
+          </div>
+          <div>
+            <span id="statHot">0</span>
+            <p>горячих</p>
+          </div>
+          <div>
+            <span id="statPipeline">0</span>
+            <p>в работе</p>
+          </div>
+          <div>
+            <span id="statBackup">—</span>
+            <p>backup</p>
+          </div>
+        </section>
+
+        <section id="todayView" class="content-view active">
+          <div id="dailyBrief" class="daily-brief"></div>
+          <div id="todayList" class="client-list"></div>
+        </section>
+
+        <section id="pipelineView" class="content-view">
+          <div id="pipelineBoard" class="pipeline-board"></div>
+        </section>
+
+        <section id="listView" class="content-view">
+          <div id="clientList" class="client-list"></div>
+        </section>
+
+        <section id="mapView" class="content-view">
+          <div class="map-actions">
+            <button id="locateButton" class="secondary-button">Моя позиция</button>
+            <button id="fitMapButton" class="secondary-button">Все клиенты</button>
+          </div>
+          <div id="map" class="map" aria-label="Карта клиентов"></div>
+        </section>
+      </main>
+
+      <nav class="bottom-nav" aria-label="Основные действия">
+        <button class="nav-button active" data-view="today"><span>!</span><b>Сегодня</b></button>
+        <button class="nav-button" data-view="pipeline"><span>▥</span><b>Воронка</b></button>
+        <button class="nav-button primary" id="addClientButton"><span>＋</span><b>Клиент</b></button>
+        <button class="nav-button" data-view="map"><span>◎</span><b>Карта</b></button>
+        <button class="nav-button" id="dataButton"><span>⇅</span><b>Данные</b></button>
+      </nav>
+    </div>
+
+    <dialog id="clientDialog" class="sheet">
+      <form id="clientForm" method="dialog">
+        <header class="sheet-header">
+          <div>
+            <p class="eyebrow" id="sheetMode">Новый клиент</p>
+            <h2 id="sheetTitle">Карточка</h2>
+          </div>
+          <button type="button" class="icon-button" data-close-dialog title="Закрыть">×</button>
+        </header>
+
+        <input type="hidden" id="clientId">
+
+        <section class="form-section">
+          <p class="section-title">Клиент</p>
+          <div class="form-grid">
+            <label>Название
+              <input id="nameInput" required placeholder="БЦ Северный">
+            </label>
+            <label>Контакт
+              <input id="contactInput" placeholder="Имя, должность">
+            </label>
+            <label>Телефон
+              <input id="phoneInput" inputmode="tel" placeholder="+7...">
+            </label>
+            <label>Email
+              <input id="emailInput" type="email" placeholder="mail@example.ru">
+            </label>
+            <label>Этап воронки
+              <select id="statusInput"></select>
+            </label>
+            <label>Горячесть
+              <select id="heatInput">
+                <option>Холодный</option>
+                <option>Теплый</option>
+                <option>Горячий</option>
+              </select>
+            </label>
+            <label>Следующее действие
+              <select id="nextActionInput"></select>
+            </label>
+            <label>Дата действия
+              <input id="nextContactInput" type="date">
+            </label>
+          </div>
+        </section>
+
+        <section class="form-section">
+          <p class="section-title">КП</p>
+          <div class="form-grid">
+            <label>Дата КП
+              <input id="offerDateInput" type="date">
+            </label>
+            <label>Сумма КП
+              <input id="offerAmountInput" inputmode="decimal" placeholder="150000">
+            </label>
+            <label>Пакет / продукт
+              <input id="offerProductInput" placeholder="Вендэкс Start, кофе, снеки, аренда">
+            </label>
+            <label>Ссылка на КП
+              <input id="offerLinkInput" placeholder="https://...">
+            </label>
+            <label class="wide-label">Комментарий по КП
+              <textarea id="offerCommentInput" rows="3" placeholder="Что важно учесть по условиям"></textarea>
+            </label>
+          </div>
+        </section>
+
+        <section class="form-section">
+          <p class="section-title">Разведка точки</p>
+          <div class="form-grid">
+            <label>Тип точки
+              <select id="placeTypeInput">
+                <option>Не указано</option>
+                <option>Бизнес-центр</option>
+                <option>Офис</option>
+                <option>Производство</option>
+                <option>Учебное заведение</option>
+                <option>Медцентр</option>
+                <option>ТЦ / ритейл</option>
+                <option>Другое</option>
+              </select>
+            </label>
+            <label>Потенциал
+              <select id="potentialInput">
+                <option>Не оценен</option>
+                <option>Низкий</option>
+                <option>Средний</option>
+                <option>Высокий</option>
+              </select>
+            </label>
+            <label>Трафик / люди
+              <input id="trafficInput" placeholder="200 сотрудников, гости, смены">
+            </label>
+            <label>Конкуренты
+              <input id="competitorsInput" placeholder="Кофейня, автомат, нет">
+            </label>
+            <label class="wide-label">Адрес
+              <input id="addressInput" placeholder="Город, улица, дом">
+            </label>
+            <div class="coord-row">
+              <label>Широта
+                <input id="latInput" inputmode="decimal" placeholder="55.75">
+              </label>
+              <label>Долгота
+                <input id="lngInput" inputmode="decimal" placeholder="37.61">
+              </label>
+            </div>
+            <button type="button" id="geocodeButton" class="secondary-button wide">Найти координаты по адресу</button>
+          </div>
+        </section>
+
+        <section class="form-section">
+          <div class="section-head">
+            <p class="section-title">История</p>
+            <button type="button" id="addTimelineButton" class="secondary-button small-button">Добавить событие</button>
+          </div>
+          <div id="timelineEditor" class="editor-list"></div>
+        </section>
+
+        <section class="form-section">
+          <div class="section-head">
+            <p class="section-title">Фото точки</p>
+            <label class="file-button small-button">
+              Добавить фото
+              <input id="photoInput" type="file" accept="image/*" multiple>
+            </label>
+          </div>
+          <div id="photoPreview" class="photo-grid"></div>
+        </section>
+
+        <section class="suggestion-box">
+          <div>
+            <p class="eyebrow">Шаблон сообщения</p>
+            <select id="templateInput" class="template-select">
+              <option value="first">Первое касание</option>
+              <option value="afterOffer">После КП</option>
+              <option value="softPing">Мягкое напоминание</option>
+              <option value="paused">После паузы</option>
+              <option value="current">Текущий клиент</option>
+            </select>
+            <p id="messageSuggestion"></p>
+          </div>
+          <button type="button" id="copySuggestionButton" class="secondary-button">Копировать</button>
+        </section>
+
+        <footer class="sheet-actions">
+          <button type="button" id="deleteClientButton" class="danger-button" hidden>Удалить</button>
+          <button type="button" class="secondary-button" data-close-dialog>Отмена</button>
+          <button type="submit" class="primary-button">Сохранить</button>
+        </footer>
+      </form>
+    </dialog>
+
+    <dialog id="dataDialog" class="sheet compact">
+      <header class="sheet-header">
+        <div>
+          <p class="eyebrow">Локальные данные</p>
+          <h2>Резервная копия</h2>
+        </div>
+        <button type="button" class="icon-button" data-close-dialog title="Закрыть">×</button>
+      </header>
+      <div id="backupNotice" class="backup-notice"></div>
+      <div class="data-actions">
+        <button id="exportButton" class="primary-button">Скачать базу JSON</button>
+        <label class="file-button">
+          Импорт JSON
+          <input id="importInput" type="file" accept="application/json">
+        </label>
+        <button id="seedButton" class="secondary-button">Добавить демо</button>
+      </div>
+      <p class="muted">Все данные лежат в браузере этого устройства. Перед переездом на другой телефон, очисткой Safari или публикацией новой версии сделайте экспорт.</p>
+    </dialog>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="app.js" type="module"></script>
+  </body>
+</html>

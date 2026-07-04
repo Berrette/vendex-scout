@@ -1,0 +1,19 @@
+{
+  "name": "Вендэкс Scout",
+  "short_name": "Scout",
+  "description": "Локальная CRM для вендинговых КП, контактов, договоренностей и карты клиентов.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f3ec",
+  "theme_color": "#163d3a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
